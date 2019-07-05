@@ -13,11 +13,11 @@ import pickle
 def worker(model, max_steps=1000):
     """
     Performs the game simulation, and is called across all processes.
-    Returns a list of training data in the shape (n_steps, 4), and
+    Returns a list of training data in the shape (n_steps, observation_shape),
     and the total reward of the rollout.
     """
     train_data = []
-    env = make_env()
+    env = gym.make('CartPole-v0')
     obs = env.reset()
     # obs = filter_obs(obs)
 
@@ -44,7 +44,7 @@ def worker(model, max_steps=1000):
 
 
 if __name__ == '__main__':
-    ### Setp for MPI ###
+    ### Setup for MPI ###
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     n_processes = comm.Get_size()

@@ -11,9 +11,12 @@ class Model():
         else:
             self.sess = tf.Session(config=sess_config)
 
+        ### Initialize MPI variables ###
         self.comm = comm
         self.controller = controller
         self.rank = rank
+
+        ### Initialize placeholder and other network ops ###
         self.sess_config = sess_config
         self.obs_shape = obs_shape
         self.n_acts = n_acts
@@ -22,10 +25,13 @@ class Model():
         self.optimizer = tf.train.AdamOptimizer(learning_rate=1e-3)
         self.create_policy_ops()
         self.sess.run(tf.global_variables_initializer())
+        # Sync the weights of models on all processes
         self.sync_weights()
 
     def create_phs(self, obs_shape=(42, 42)):
-        # Placeholders
+        """
+        Creates placeholders (input ops) for the model.
+        """
         self.obs_ph = tf.placeholder(
             dtype=tf.float32, shape=(None, *list(obs_shape)))
         self.next_obs_ph = tf.placeholder(
@@ -37,7 +43,7 @@ class Model():
     def create_policy_ops(self):
         """
         Creates the ops for the policy and value network.
-        Additionally creates the  
+        Additionally creates the ops for updating the network.
         """
         with tf.variable_scope('policy'):
             # Creating a conv net for the policy and value estimator
@@ -77,6 +83,10 @@ class Model():
                 self.value_update = self.optimizer.minimize(self.value_loss)
 
     def gen_actions(self, obs):
+        """
+        Generates actions (1 to 1) for each observation passed
+        into the function.
+        """
         if type(obs) == list:
             obs = np.asarray(obs)
 
@@ -88,6 +98,10 @@ class Model():
         return self.sess.run(self.act_out, feed_dict={self.obs_ph: obs})[0]
 
     def gen_actions_and_values(self, obs):
+        """
+        Generates actions and values (1 to 1) for each observation
+        passed into the function.
+        """
         if type(obs) == list:
             obs = np.asarray(obs)
 
@@ -100,6 +114,10 @@ class Model():
         return acts[0], vals[0]
 
     def train_policy(self, states, actions, rewards, gaes):
+        """
+        Updates the policy given training data from
+        environment simulation.
+        """
         self.sess.run([self.policy_update, self.value_update],
                       feed_dict={self.obs_ph: states,
                                  self.act_ph: actions,
@@ -107,6 +125,10 @@ class Model():
                                  self.gae_ph: gaes})
 
     def sync_weights(self):
+        """
+        Sync the weights between model on all processes
+        using MPI.
+        """
         if self.rank == self.controller:
             self.comm.bcast(self.sess.run(
                 tf.trainable_variables()), self.controller)
