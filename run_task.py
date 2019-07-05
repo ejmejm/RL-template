@@ -37,8 +37,8 @@ def worker(model, max_steps=1000):
     train_data = np.asarray(train_data)
 
     ep_reward = np.sum(train_data[:, 2])
-    # Discount rewards
-    train_data[:, 2] = discount_rewards(train_data[:, 2])
+    # Calculate GAEs and replace values with the new values.
+    train_data[:, 3] = calculate_gaes(train_data[:, 2], train_data[:, 3])
 
     return train_data, ep_reward
 
@@ -98,10 +98,11 @@ if __name__ == '__main__':
             obs_train_data = np.vstack(train_data[:, 0])
             action_train_data = train_data[:, 1]
             reward_train_data = train_data[:, 2]
+            gae_train_data = train_data[:, 3]
 
             ### Train model and sync weights with all processes ###
             model.train_policy(
-                obs_train_data, action_train_data, reward_train_data)
+                obs_train_data, action_train_data, reward_train_data, gae_train_data)
             model.sync_weights()
         else:
             model.sync_weights()

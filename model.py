@@ -32,6 +32,7 @@ class Model():
             dtype=tf.float32, shape=(None, *list(obs_shape)))
         self.act_ph = tf.placeholder(dtype=tf.int32, shape=(None,))
         self.rew_ph = tf.placeholder(dtype=tf.float32, shape=(None,))
+        self.gae_ph = tf.placeholder(dtype=tf.float32, shape=(None,))
 
     def create_policy_ops(self):
         """
@@ -60,12 +61,11 @@ class Model():
                 self.act_ph, self.n_acts, dtype=tf.float32)
             self.log_probs = tf.log(self.act_probs_op)
 
-            self.advantages = self.rew_ph - tf.squeeze(self.value_op)
-
             self.resp_acts = tf.reduce_sum(
                 self.act_masks * self.log_probs, axis=1)
             self.policy_loss = \
-                -tf.reduce_mean(self.resp_acts * self.advantages)
+                -tf.reduce_mean(self.resp_acts * self.gae_ph)
+            print(self.resp_acts * self.gae_ph)
 
             self.policy_update = self.optimizer.minimize(self.policy_loss)
 
@@ -99,11 +99,12 @@ class Model():
         acts, vals = self.sess.run([self.act_out, self.value_op], feed_dict={self.obs_ph: obs})
         return acts[0], vals[0]
 
-    def train_policy(self, states, actions, rewards):
+    def train_policy(self, states, actions, rewards, gaes):
         self.sess.run([self.policy_update, self.value_update],
                       feed_dict={self.obs_ph: states,
                                  self.act_ph: actions,
-                                 self.rew_ph: rewards})
+                                 self.rew_ph: rewards,
+                                 self.gae_ph: gaes})
 
     def sync_weights(self):
         if self.rank == self.controller:

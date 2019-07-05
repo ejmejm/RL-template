@@ -37,9 +37,11 @@ def discount_rewards(rewards, gamma=0.99):
     return np.array(new_rewards[::-1])
 
 def calculate_gaes(rewards, values, gamma=0.99, decay=0.95):
-    next_values = values[1:] + [0]
+    next_values = np.concatenate([values[1:], [0]])
     deltas = [rew + gamma * next_val - val for rew, val, next_val in zip(rewards, values, next_values)]
+    
     gaes = [deltas[-1]]
     for i in reversed(range(len(deltas)-1)):
         gaes.append(deltas[i] + decay * gamma * gaes[-1])
+
     return np.array(gaes[::-1])
