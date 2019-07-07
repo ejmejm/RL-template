@@ -23,17 +23,18 @@ def log(string):
 
 def filter_obs(obs, obs_shape=(42, 42)):
     """
-    Used for formatting 2D observations.
-    Filters an obs to the right size, color, and scale.
-    Only works for 1 obs at a time.
+    Used for formatting 3D observations (3rd axis because
+    of color channel in this case). Filters an obs to the
+    right size, color, and scale. Only works for 1 obs at a time.
     """
     assert(type(obs) == np.ndarray), "The observation must be a numpy array!"
-    assert(len(obs.shape) == 2), "The observation must be a 2D array!"
+    assert(len(obs.shape) == 3), "The observation must be a 3D array!"
 
     obs = cv2.resize(obs, obs_shape, interpolation=cv2.INTER_LINEAR)
     obs = cv2.cvtColor(obs, cv2.COLOR_BGR2GRAY)
     obs = obs / 255.
-    return obs
+    
+    return obs[:, :, np.newaxis]
 
 def discount_rewards(rewards, gamma=0.99):
     """

@@ -4,7 +4,7 @@ import time
 from mpi4py import MPI
 import heapq
 import tensorflow as tf
-from model import Model
+from models import TwoDimModel
 from utils import *
 import multiprocessing
 import pickle
@@ -17,9 +17,10 @@ def worker(model, max_steps=1000):
     and the total reward of the rollout.
     """
     train_data = []
-    env = gym.make('CartPole-v0')
+    # https://gym.openai.com/envs/Breakout-v0/
+    env = gym.make('Breakout-v0')
     obs = env.reset()
-    # obs = filter_obs(obs)
+    obs = filter_obs(obs, obs_shape=(42, 42))
 
     ep_reward = 0
     for _ in range(max_steps):
@@ -27,7 +28,7 @@ def worker(model, max_steps=1000):
         act, val = act[0], val[0]
 
         next_obs, rew, d, _ = env.step(act)
-        # next_obs = filter_obs(next_obs)
+        next_obs = filter_obs(next_obs, obs_shape=(42, 42))
         train_data.append([obs, act, rew, val, next_obs])
         obs = next_obs
         ep_reward += rew
@@ -63,8 +64,8 @@ if __name__ == '__main__':
     else:
         device_config = tf.ConfigProto(device_count={'GPU': 0})
 
-    model = Model(comm, controller, rank, n_acts=2,
-                  obs_shape=(4,), sess_config=device_config)
+    model = TwoDimModel(comm, controller, rank, n_acts=4,
+                  obs_shape=(42, 42, 1), sess_config=device_config)
 
     all_rewards = []
     for epoch in range(1, n_epochs+1):
@@ -95,7 +96,7 @@ if __name__ == '__main__':
             train_data = np.concatenate(train_data)
             np.random.shuffle(train_data)
 
-            obs_train_data = np.vstack(train_data[:, 0])
+            obs_train_data = np.stack(train_data[:, 0])
             action_train_data = train_data[:, 1]
             reward_train_data = train_data[:, 2]
             gae_train_data = train_data[:, 3]
