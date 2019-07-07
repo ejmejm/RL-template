@@ -1,3 +1,10 @@
+"""
+Example of an efficiently implemented RL model
+in a 1D environment. This example uses the CartPole
+environment from OpenAI's gym.
+"""
+
+
 import numpy as np
 import gym
 import time
@@ -63,7 +70,7 @@ if __name__ == '__main__':
         device_config = tf.ConfigProto(device_count={'GPU': 0})
 
     model = OneDimModel(comm, controller, rank, n_acts=2,
-                  obs_shape=(4,), sess_config=device_config)
+                        obs_shape=(4,), sess_config=device_config)
 
     all_rewards = []
     for epoch in range(1, n_epochs+1):

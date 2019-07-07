@@ -1,0 +1,5 @@
+numpy>=1.15.4
+opencv-python==4.0.0.21
+gym>=0.10.9
+tensorflow>=1.13.1
+mpi4py>=3.0.1

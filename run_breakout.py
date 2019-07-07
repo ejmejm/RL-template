@@ -1,3 +1,10 @@
+"""
+Example of an efficiently implemented RL model
+in a 2D environment. This example uses the Atari
+game breakout.
+"""
+
+
 import numpy as np
 import gym
 import time
@@ -65,7 +72,7 @@ if __name__ == '__main__':
         device_config = tf.ConfigProto(device_count={'GPU': 0})
 
     model = TwoDimModel(comm, controller, rank, n_acts=4,
-                  obs_shape=(42, 42, 1), sess_config=device_config)
+                        obs_shape=(42, 42, 1), sess_config=device_config)
 
     all_rewards = []
     for epoch in range(1, n_epochs+1):
@@ -88,9 +95,9 @@ if __name__ == '__main__':
             ### Log and print reward ###
             if epoch % log_freq == 0:
                 print(
-                    f'Epoch: {epoch}, Avg Reward: {np.mean(all_rewards[-n_train_batches:])}')
+                    'Epoch: {epoch}, Avg Reward: {np.mean(all_rewards[-n_train_batches:])}'.format(epoch))
                 log(
-                    f'Epoch: {epoch}, Avg Reward: {np.mean(all_rewards[-n_train_batches:])}')
+                    'Epoch: {epoch}, Avg Reward: {np.mean(all_rewards[-n_train_batches:])}'.format(epoch))
 
             ### Format training data ###
             train_data = np.concatenate(train_data)

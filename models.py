@@ -3,11 +3,13 @@ from tensorflow import keras
 import tensorflow as tf
 import numpy as np
 
+
 class BaseModel():
     """
     Base class used to implement a model.
     This class itself should not instantiated.
     """
+
     def __init__(self, comm, controller, rank, n_acts, obs_shape, sess_config=None):
         if sess_config is None:
             self.sess = tf.Session()
@@ -82,7 +84,8 @@ class BaseModel():
         assert (list(obs.shape)[1:] == list(self.obs_shape)), \
             "Observations must have the shape, (batch_size, dimensions..., 1)!"
 
-        acts, vals = self.sess.run([self.act_out, self.value_op], feed_dict={self.obs_ph: obs})
+        acts, vals = self.sess.run(
+            [self.act_out, self.value_op], feed_dict={self.obs_ph: obs})
         return acts[0], vals[0]
 
     def train_policy(self, states, actions, rewards, gaes):
@@ -110,11 +113,13 @@ class BaseModel():
             for pair in zip(t_vars, sync_vars):
                 self.sess.run(tf.assign(pair[0], pair[1]))
 
+
 class OneDimModel(BaseModel):
     """
     Vanilla Policy Gradient implemented for an
     environment with 1-dimensional states.
     """
+
     def __init__(self, comm, controller, rank, n_acts, obs_shape, sess_config=None):
         super().__init__(comm, controller, rank, n_acts, obs_shape, sess_config)
 
@@ -165,6 +170,7 @@ class TwoDimModel(BaseModel):
     Vanilla Policy Gradient implemented for an
     environment with 2-dimensional states.
     """
+
     def __init__(self, comm, controller, rank, n_acts, obs_shape, sess_config=None):
         super().__init__(comm, controller, rank, n_acts, obs_shape, sess_config)
 
@@ -185,7 +191,7 @@ class TwoDimModel(BaseModel):
             val_conv_1 = Conv2D(32, 3, 2, activation='relu')(conv_1)
             val_pool_1 = MaxPool2D(2)(val_conv_1)
             val_flat = Flatten()(val_pool_1)
-            
+
             # Output probability distribution over possible actions
             self.act_probs_op = Dense(
                 self.n_acts, activation='softmax', name='act_probs')(act_flat)
