@@ -95,9 +95,9 @@ if __name__ == '__main__':
             ### Log and print reward ###
             if epoch % log_freq == 0:
                 print(
-                    'Epoch: {epoch}, Avg Reward: {np.mean(all_rewards[-n_train_batches:])}'.format(epoch))
+                    'Epoch: {}, Avg Reward: {np.mean(all_rewards[-n_train_batches:])}'.format(epoch))
                 log(
-                    'Epoch: {epoch}, Avg Reward: {np.mean(all_rewards[-n_train_batches:])}'.format(epoch))
+                    'Epoch: {}, Avg Reward: {np.mean(all_rewards[-n_train_batches:])}'.format(epoch))
 
             ### Format training data ###
             train_data = np.concatenate(train_data)

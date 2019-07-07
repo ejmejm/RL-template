@@ -122,6 +122,7 @@ class OneDimModel(BaseModel):
 
     def __init__(self, comm, controller, rank, n_acts, obs_shape, sess_config=None):
         super().__init__(comm, controller, rank, n_acts, obs_shape, sess_config)
+        self.optimizer = tf.train.AdamOptimizer(learning_rate=1e-4)
 
     def create_policy_ops(self):
         """
