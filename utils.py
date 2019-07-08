@@ -18,6 +18,9 @@ def log(string):
     Log something to the log file created
     by `init_logger`.
     """
+    if type(string) != str:
+        string = str(string)
+
     with open(log_path, 'a') as f:
         f.write(string + '\n')
 
